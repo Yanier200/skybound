@@ -117,6 +117,7 @@ Grab the latest build from the **Releases** tab of this repository:
 
 - **Windows** — `SKYBOUND-<version>-portable.exe`. Run it; nothing is installed.
 - **Android** — `SKYBOUND-<version>.apk`. Sideload it; the APK requests no network permission.
+  needs CFW with signature patches. See the platform note above.
 
 > **Pre-release software.** The current release is marked as a pre-release on purpose: it is prone
 > to bugs, balance changes and save-format changes between versions. Expect rough edges.
