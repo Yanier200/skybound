@@ -9,6 +9,11 @@ dist/
 *.idsig
 android/assets/www/
 android/build/
+switch/build/
+switch/*.nro
+switch/*.elf
+switch/*.lst
+switch/*.map
 
 # local toolchains and agent state
 .tooling/

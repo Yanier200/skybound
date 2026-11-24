@@ -29,12 +29,14 @@ The whole thing is MIT licensed. Source, art pipeline and build scripts are all 
 | --- | --- | --- |
 | **Windows** | ✅ Available | Portable `.exe`, no installer, no admin rights. Comes up fullscreen. |
 | **Android** | ✅ Available | Signed `.apk`, phone and tablet, touch controls. |
-| **Nintendo Switch (homebrew)** | 🚧 **Not yet available** | A homebrew port is planned but no build exists yet. Not distributable in any form today. |
+| **Nintendo Switch (homebrew)** | 🚧 **Platform layer only** | [`switch/`](switch/README.md) compiles to a working `.nro` harness (window, pad, main loop). The game itself is not ported. |
 
-To be explicit, because it is easy to misread a table like this: **there is currently no Nintendo
-Switch build of SKYBOUND.** The game is plain JavaScript on top of WebGL, so a homebrew port is
-plausible, but nothing has been written, built or tested for it, and nothing here should be read as
-a promise that one is coming on any particular date.
+To be explicit, because it is easy to misread a table like this: **there is no playable Nintendo
+Switch build of SKYBOUND.** The web build is JavaScript on top of WebGL, and homebrew on Switch has
+no browser or WebGL, so the game needs a native rewrite. What exists in [`switch/`](switch/README.md)
+is the first step of that rewrite — a devkitA64/libnx project that builds a real `.nro` and brings up
+the display and the pad. The renderer, level generation, physics and menus are still to come, and no
+`.nsp` exists or can exist without console keys.
 
 ## Screenshots
 
