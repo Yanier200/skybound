@@ -29,7 +29,7 @@ mkdir -p "$OUT/gen" "$OUT/classes" "$OUT/dex"
 rm -rf android/assets/www
 mkdir -p android/assets/www
 cp index.html styles.css android/assets/www/
-cp -r js vendor android/assets/www/
+cp -r js vendor assets android/assets/www/
 
 # 2. resources and manifest
 "$BT/aapt2.exe" compile --dir android/res -o "$OUT/res.zip"

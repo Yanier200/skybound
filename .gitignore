@@ -9,6 +9,7 @@ dist/
 *.idsig
 android/assets/www/
 android/build/
+assets/music/
 
 # local toolchains and agent state
 .tooling/

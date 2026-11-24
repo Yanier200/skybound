@@ -3,6 +3,7 @@ import { makeLevel, LEVEL_COUNT, THEMES } from './levelgen.js';
 import { World } from './world.js';
 import { Player, PLAYER } from './player.js';
 import { GameAudio } from './audio.js';
+import { Music } from './music.js';
 import { clamp } from './rng.js';
 import { initTouchControls } from './mobile.js';
 
@@ -25,6 +26,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, 0.1, 420);
 
 const audio = new GameAudio();
+const music = new Music();
 const player = new Player(scene);
 
 const clearedCount = () => Object.keys(save.best).length;
@@ -322,6 +324,7 @@ const DEFAULTS = {
   fps: 'off',
   quality: 'balanced',
   volume: 'normal',
+  music: 'normal',
 };
 
 const settings = { ...DEFAULTS };
@@ -341,6 +344,7 @@ const DEADZONE_PRESETS = { small: 0.12, normal: 0.18, large: 0.26 };
 const CAM_SPEED_PRESETS = { slow: 0.6, normal: 1, fast: 1.5 };
 const HUD_SCALES = { normal: 1, large: 1.18, huge: 1.4 };
 const VOLUME_PRESETS = { off: 0, low: 0.14, normal: 0.3, loud: 0.62 };
+const MUSIC_PRESETS = { off: 0, low: 0.2, normal: 0.45, loud: 0.8 };
 
 // Settings are the only source of truth; these read the preset the rest of the
 // game wants without keeping a second copy of it in a module-level variable.
@@ -354,6 +358,8 @@ function saveSettings() {
 
 function applySettings() {
   audio.setVolume(VOLUME_PRESETS[settings.volume] ?? 0.3);
+  music.setVolume(MUSIC_PRESETS[settings.music] ?? 0.45);
+  music.setMuted(audio.muted);
   document.documentElement.style.setProperty('--ui-scale', String(HUD_SCALES[settings.hudScale] ?? 1));
   $('fps').classList.toggle('hidden', settings.fps !== 'on');
   applyQuality();
@@ -460,6 +466,7 @@ function updateMuteUi() {
 
 function toggleMute() {
   audio.setMuted(!audio.muted);
+  music.setMuted(audio.muted);
   try { localStorage.setItem(MUTE_KEY, audio.muted ? '1' : '0'); } catch { /* ignore */ }
   updateMuteUi();
   if (!audio.muted) audio.ui();
@@ -495,6 +502,7 @@ function startLevel(index) {
   audio.resume();
   const spec = makeLevel(i);
   mountWorld(spec);
+  music.play(spec.theme.id);
   game.level = i;
   game.timer = 0;
   game.deaths = 0;
@@ -628,6 +636,7 @@ function showMenu() {
   hideHud();
   loadShowcase(Math.min(save.unlocked, LEVEL_COUNT - 1));
   updateMenuUi();
+  music.play('menu');
   showScreen('screen-menu');
   focusItems([$('btn-continue'), $('btn-levels'), $('btn-options'), $('btn-controls')]);
 }
@@ -699,6 +708,7 @@ function openLevels() {
   hideHud();
   loadShowcase(Math.min(save.unlocked, LEVEL_COUNT - 1));
   buildLevelSelect();
+  music.play('menu');
   showScreen('screen-levels');
 }
 
@@ -728,8 +738,10 @@ const OPTION_SECTIONS = [
   {
     title: 'Audio',
     rows: [
-      { key: 'volume', title: 'Volume', choices: [['off', 'Off'], ['low', 'Low'], ['normal', 'Normal'], ['loud', 'Loud']] },
+      { key: 'volume', title: 'Effects', choices: [['off', 'Off'], ['low', 'Low'], ['normal', 'Normal'], ['loud', 'Loud']] },
+      { key: 'music', title: 'Music', choices: [['off', 'Off'], ['low', 'Low'], ['normal', 'Normal'], ['loud', 'Loud']] },
       { action: 'sound', title: 'Sound', text: () => (audio.muted ? 'Muted' : 'On') },
+      { action: 'track', title: 'Track', text: () => music.label() },
     ],
   },
   {
@@ -746,6 +758,8 @@ let optionRows = [];
 const OPTION_ACTIONS = {
   fullscreen: toggleFullscreen,
   sound: toggleMute,
+  // Restart the current track from the top instead of doing nothing.
+  track: () => { if (music.key) { const k = music.key; music.stop(); music.play(k); } },
   resetSettings: () => {
     Object.assign(settings, DEFAULTS);
     saveSettings();
@@ -827,7 +841,7 @@ function buildOptions() {
   host.appendChild(head);
   const about = document.createElement('div');
   about.className = 'opt-about';
-  about.innerHTML = '<span>SKYBOUND · 100 levels across ten themes</span><span>Progress and these options are saved on this PC</span><span>Version 1.0.0</span>';
+  about.innerHTML = '<span>SKYBOUND · 600 levels across six themes</span><span>Progress and these options are saved on this PC</span><span>Version 1.1.0</span>';
   host.appendChild(about);
 
   focusItems([...buttons, $('btn-options-back')], 0);
@@ -850,6 +864,7 @@ function openOptions() {
   if (document.pointerLockElement) document.exitPointerLock();
   hideHud();
   loadShowcase(Math.min(save.unlocked, LEVEL_COUNT - 1));
+  music.play('menu');
   showScreen('screen-options');
   buildOptions();
 }
@@ -859,6 +874,7 @@ function openControls() {
   if (document.pointerLockElement) document.exitPointerLock();
   hideHud();
   loadShowcase(Math.min(save.unlocked, LEVEL_COUNT - 1));
+  music.play('menu');
   showScreen('screen-controls');
   focusItems([$('btn-controls-back')]);
 }
@@ -1509,4 +1525,4 @@ const touch = initTouchControls({ pad, game });
 requestAnimationFrame(frame);
 
 // Handy for debugging in the console.
-window.SKYBOUND = { game, player, save, settings, applySettings, startLevel, makeLevel, camera, renderer, scene, touch };
+window.SKYBOUND = { game, player, save, settings, applySettings, startLevel, makeLevel, camera, renderer, scene, touch, audio, music };

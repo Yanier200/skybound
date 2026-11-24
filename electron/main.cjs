@@ -19,6 +19,7 @@ const MIME = {
   '.css': 'text/css; charset=utf-8',
   '.png': 'image/png',
   '.ico': 'image/x-icon',
+  '.wav': 'audio/wav',
 };
 
 if (!app.requestSingleInstanceLock()) {
@@ -36,22 +37,58 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } },
 ]);
 
-function serveFile(requestPath) {
-  const decoded = decodeURIComponent(requestPath || '/');
+// Audio is streamed, not slurped: the soundtrack files are tens of megabytes
+// each, and Chromium's media stack asks for byte ranges rather than a whole
+// body. Without 206 replies it gives up with a format error.
+function serveFile(request) {
+  const url = new URL(request.url);
+  const decoded = decodeURIComponent(url.pathname || '/');
   const candidate = path.normalize(path.join(ROOT, decoded === '/' ? 'index.html' : decoded));
   if (!candidate.startsWith(ROOT + path.sep)) return new Response('Forbidden', { status: 403 });
+
+  let size = 0;
   try {
-    if (!fs.statSync(candidate).isFile()) return new Response('Not found', { status: 404 });
-    return new Response(new Uint8Array(fs.readFileSync(candidate)), {
-      status: 200,
-      headers: {
-        'Content-Type': MIME[path.extname(candidate).toLowerCase()] || 'application/octet-stream',
-        'Cache-Control': 'no-store',
-      },
-    });
+    const stat = fs.statSync(candidate);
+    if (!stat.isFile()) throw new Error('not a file');
+    size = stat.size;
   } catch {
     return new Response('Not found', { status: 404 });
   }
+
+  const type = MIME[path.extname(candidate).toLowerCase()] || 'application/octet-stream';
+  const headers = { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-store' };
+
+  const range = request.headers.get('range');
+  const match = range && /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+  if (match) {
+    let start = match[1] === '' ? null : Number(match[1]);
+    let end = match[2] === '' ? null : Number(match[2]);
+    if (start === null && end !== null) {
+      start = Math.max(0, size - end);
+      end = size - 1;
+    }
+    if (start === null) start = 0;
+    if (end === null || end >= size) end = size - 1;
+    if (start >= size || start > end) {
+      return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${size}` } });
+    }
+    const fd = fs.openSync(candidate, 'r');
+    const chunk = Buffer.alloc(end - start + 1);
+    try {
+      fs.readSync(fd, chunk, 0, chunk.length, start);
+    } finally {
+      fs.closeSync(fd);
+    }
+    return new Response(chunk, {
+      status: 206,
+      headers: { ...headers, 'Content-Length': String(chunk.length), 'Content-Range': `bytes ${start}-${end}/${size}` },
+    });
+  }
+
+  return new Response(fs.readFileSync(candidate), {
+    status: 200,
+    headers: { ...headers, 'Content-Length': String(size) },
+  });
 }
 
 function createWindow() {
@@ -138,7 +175,7 @@ const SMOKE_PROBE = `(async () => {
 app.whenReady().then(() => {
   protocol.handle('app', (request) => {
     try {
-      return serveFile(new URL(request.url).pathname);
+      return serveFile(request);
     } catch {
       return new Response('Bad request', { status: 400 });
     }
