@@ -1,6 +1,6 @@
 // ============================================================================
 // Headless playtest — drives the real Player controller (same physics as the
-// game) across all 100 levels.
+// game) across all 600 levels. tools/check-levels.mjs reuses these helpers.
 //
 //   gapPossible(): starts standing at the very edge of the source platform at
 //   full run speed and tries several jump/dash/bounce strategies. If none
@@ -13,6 +13,7 @@
 // Moving platforms are evaluated at their closest phase (how a player waits
 // for them). Crumbling tiles are solid (you get 0.9s to jump off).
 // ============================================================================
+import { pathToFileURL } from 'node:url';
 import { Player, PLAYER } from '../js/player.js';
 import { makeLevel, LEVEL_COUNT, WORLD_SCALE as S } from '../js/levelgen.js';
 
@@ -22,11 +23,11 @@ const player = new Player({ add() {} });
 
 const RADIUS = PLAYER.radius;
 
-function posOf(p) {
+export function posOf(p) {
   return { x: p.x, y: p.y, z: p.z };
 }
 
-function closestPhase(p, toward) {
+export function closestPhase(p, toward) {
   if (p.kind !== 'move') return posOf(p);
   if (p.axis === 'y') {
     const sign = Math.sign(toward.y - p.y) || 1;
@@ -40,7 +41,7 @@ function closestPhase(p, toward) {
   };
 }
 
-function buildWorld(level, positions) {
+export function buildWorld(level, positions) {
   const solids = level.platforms.map((p, i) => {
     const q = positions[i];
     return {
@@ -108,7 +109,7 @@ function startPlayer(x, y, z, facing) {
 }
 
 // ---------------------------------------------------------------- gap test
-function gapPossible(level, positions, world, i, j) {
+export function gapPossible(level, positions, world, i, j) {
   const A = level.platforms[i];
   const B = level.platforms[j];
   const Ap = positions[i];
@@ -211,7 +212,7 @@ function gapPossible(level, positions, world, i, j) {
 }
 
 // ---------------------------------------------------------------- auto-play
-function playLevel(level, positions, plan) {
+export function playLevel(level, positions, plan) {
   const world = buildWorld(level, positions);
   const plats = level.platforms;
   startPlayer(level.spawn.x, level.spawn.y + 0.02 * S, level.spawn.z, level.spawnFacing);
@@ -291,6 +292,7 @@ function playLevel(level, positions, plan) {
 }
 
 // ------------------------------------------------------------- run the sweep
+export function sweep() {
 let impossible = 0;
 let needExtra = 0;
 let totalGaps = 0;
@@ -369,4 +371,11 @@ if (botStuck.length) {
   console.log('\nBOT STUCK:');
   for (const b of botStuck) console.log('  ' + b);
 }
-process.exit(impossible ? 1 : 0);
+return { totalGaps, impossible, needExtra, botStuck };
+}
+
+// Only sweep when run directly; importing this file must stay side-effect free.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const { impossible } = sweep();
+  process.exit(impossible ? 1 : 0);
+}

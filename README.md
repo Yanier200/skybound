@@ -19,6 +19,7 @@ The whole thing is MIT licensed. Source, art pipeline and build scripts are all 
 - [Controls](#controls)
 - [Download](#download)
 - [Building from source](#building-from-source)
+- [Checking every level](#checking-every-level)
 - [Project layout](#project-layout)
 - [Known issues](#known-issues)
 - [How this was made](#how-this-was-made)
@@ -144,12 +145,19 @@ npm run portable
 bash tools/build-apk.sh
 ```
 
-There is also a headless level checker that walks every generated course and reports impossible
-jumps and stuck spots:
+## Checking every level
+
+Every generated course is also checked headlessly, through the same player physics the game runs:
 
 ```bash
-node tools/playtest.mjs
+npm test                            # all 600 levels, exits non-zero on anything broken
+npm run check:levels -- --only=42   # one level, while debugging
+npm run check:levels -- --no-bot    # gaps only, skip the auto-player
 ```
+
+It fails on a jump no input can clear, a level with a crystal out of reach or buried in geometry,
+intersecting platforms, or a level that does not regenerate identically. `node tools/playtest.mjs`
+prints the per-gap and auto-player detail behind those results.
 
 ## Project layout
 
