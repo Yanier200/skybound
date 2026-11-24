@@ -21,6 +21,7 @@ The whole thing is MIT licensed. Source, art pipeline and build scripts are all 
 - [Building from source](#building-from-source)
 - [Project layout](#project-layout)
 - [Known issues](#known-issues)
+- [How this was made](#how-this-was-made)
 - [License](#license)
 
 ## Platforms
@@ -157,6 +158,34 @@ vendor/             vendored Three.js
   game has 600.
 
 If you hit something broken, please open an issue with the level number and what happened.
+
+## How this was made
+
+**SKYBOUND was partly built with the help of AI — roughly a quarter of it, not all of it.** This
+section exists so nobody has to guess where that line falls.
+
+A fair estimate is **about 25% AI-assisted, 75% hand-built**. The game's design, the feel of the
+movement, the level pacing and difficulty curve, the visual direction, the bug hunting and every
+playtest decision were made by a person sitting there playing the thing. The AI was pointed at
+specific chunks of work, not handed the project:
+
+- **Controller navigation in the menus** — walking the focus ring through the pause list, options,
+  level grid and results screens, and back out of each one.
+- **The astronaut** — the procedural character rebuilt from primitives, joint by joint.
+- **Packaging and tooling** — the Electron shell, the Android build script, the icon generator, and
+  the headless level checker that walks every course looking for impossible jumps.
+- **The Switch platform layer** in [`switch/`](switch/README.md) — written with AI assistance
+  against devkitA64/libnx, and confirmed to build; the port itself is unfinished.
+- **Documentation** — most of this README and the release notes, drafted with AI and edited by hand.
+
+What that leaves as clearly human work: the game itself — the core loop, physics and collision,
+level generation, world and hazard design, audio, save data, the UI, and the hundreds of small
+calls that make a platformer feel right. AI-written changes were read, run and tested before they
+landed, and anything that broke was debugged the ordinary way rather than accepted on faith.
+
+Why say this at all? Because "open source" is only worth something if you can see how the thing was
+made. Use it, fork it, judge it on how it plays — and if you want to know whether a specific piece
+was written by a person or a model, ask, and the answer will be a straight one.
 
 ## License
 
