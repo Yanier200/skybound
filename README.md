@@ -32,7 +32,7 @@ The whole thing is MIT licensed. Source, art pipeline and build scripts are all 
 | **Windows** | ✅ Available | Portable `.exe`, no installer, no admin rights. Comes up fullscreen. |
 | **Android** | ✅ Available | Signed `.apk`, phone and tablet, touch controls. |
 
-the display and the pad. The renderer, level generation, physics and menus are still to come, and no
+the display and the pad. The renderer, level generation, physics and menus are still to come.
 
 ## Screenshots
 
@@ -117,7 +117,7 @@ Grab the latest build from the **Releases** tab of this repository:
 
 - **Windows** — `SKYBOUND-<version>-portable.exe`. Run it; nothing is installed.
 - **Android** — `SKYBOUND-<version>.apk`. Sideload it; the APK requests no network permission.
-  needs CFW with signature patches. See the platform note above.
+  state, and exits on `+`. See the platform note above.
 
 > **Pre-release software.** The current release is marked as a pre-release on purpose: it is prone
 > to bugs, balance changes and save-format changes between versions. Expect rough edges.
