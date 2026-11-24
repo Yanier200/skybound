@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# build output
+release/
+dist/
+*.exe
+*.apk
+*.idsig
+android/assets/www/
+android/build/
+
+# local toolchains and agent state
+.tooling/
+.freebuff/
+.cloud-attachments/
+.review/
+
+# logs and editor noise
+*.log
+.DS_Store
+Thumbs.db
