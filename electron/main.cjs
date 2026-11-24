@@ -37,57 +37,63 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } },
 ]);
 
-// Audio is streamed, not slurped: the soundtrack files are tens of megabytes
-// each, and Chromium's media stack asks for byte ranges rather than a whole
-// body. Without 206 replies it gives up with a format error.
-function serveFile(request) {
-  const url = new URL(request.url);
-  const decoded = decodeURIComponent(url.pathname || '/');
-  const candidate = path.normalize(path.join(ROOT, decoded === '/' ? 'index.html' : decoded));
-  if (!candidate.startsWith(ROOT + path.sep)) return new Response('Forbidden', { status: 403 });
+// "bytes=a-b" (any side may be empty) against a known length, or null when
+// there is no usable range to answer.
+function parseRange(header, size) {
+  const match = /^bytes=(\d*)-(\d*)$/.exec((header || '').trim());
+  if (!match || (match[1] === '' && match[2] === '')) return null;
+  const start = match[1] === '' ? Math.max(0, size - Number(match[2])) : Number(match[1]);
+  const end = match[1] !== '' && match[2] !== '' ? Math.min(Number(match[2]), size - 1) : size - 1;
+  if (start > end || start >= size) return null;
+  return { start, end };
+}
 
-  let size = 0;
+function readSlice(file, start, end) {
+  const fd = fs.openSync(file, 'r');
+  const chunk = Buffer.alloc(end - start + 1);
   try {
-    const stat = fs.statSync(candidate);
-    if (!stat.isFile()) throw new Error('not a file');
+    fs.readSync(fd, chunk, 0, chunk.length, start);
+  } finally {
+    fs.closeSync(fd);
+  }
+  return chunk;
+}
+
+// Audio is streamed, not slurped: a soundtrack file is tens of megabytes and
+// Chromium's media stack asks for byte ranges instead of a whole body. Answer
+// 206 or it gives up with a format error and the game is silent.
+function serveFile(request) {
+  const pathname = decodeURIComponent(new URL(request.url).pathname || '/');
+  const file = path.normalize(path.join(ROOT, pathname === '/' ? 'index.html' : pathname));
+  if (!file.startsWith(ROOT + path.sep)) return new Response('Forbidden', { status: 403 });
+
+  let size;
+  try {
+    const stat = fs.statSync(file);
+    if (!stat.isFile()) return new Response('Not found', { status: 404 });
     size = stat.size;
   } catch {
     return new Response('Not found', { status: 404 });
   }
 
-  const type = MIME[path.extname(candidate).toLowerCase()] || 'application/octet-stream';
-  const headers = { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-store' };
+  const headers = {
+    'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'no-store',
+  };
 
-  const range = request.headers.get('range');
-  const match = range && /^bytes=(\d*)-(\d*)$/.exec(range.trim());
-  if (match) {
-    let start = match[1] === '' ? null : Number(match[1]);
-    let end = match[2] === '' ? null : Number(match[2]);
-    if (start === null && end !== null) {
-      start = Math.max(0, size - end);
-      end = size - 1;
-    }
-    if (start === null) start = 0;
-    if (end === null || end >= size) end = size - 1;
-    if (start >= size || start > end) {
-      return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${size}` } });
-    }
-    const fd = fs.openSync(candidate, 'r');
-    const chunk = Buffer.alloc(end - start + 1);
-    try {
-      fs.readSync(fd, chunk, 0, chunk.length, start);
-    } finally {
-      fs.closeSync(fd);
-    }
-    return new Response(chunk, {
-      status: 206,
-      headers: { ...headers, 'Content-Length': String(chunk.length), 'Content-Range': `bytes ${start}-${end}/${size}` },
-    });
+  const range = parseRange(request.headers.get('range'), size);
+  const body = range ? readSlice(file, range.start, range.end) : fs.readFileSync(file);
+  if (!range) {
+    return new Response(body, { status: 200, headers: { ...headers, 'Content-Length': String(body.length) } });
   }
-
-  return new Response(fs.readFileSync(candidate), {
-    status: 200,
-    headers: { ...headers, 'Content-Length': String(size) },
+  return new Response(body, {
+    status: 206,
+    headers: {
+      ...headers,
+      'Content-Length': String(body.length),
+      'Content-Range': `bytes ${range.start}-${range.end}/${size}`,
+    },
   });
 }
 

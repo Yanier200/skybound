@@ -842,7 +842,7 @@ function buildOptions() {
   host.appendChild(head);
   const about = document.createElement('div');
   about.className = 'opt-about';
-  about.innerHTML = '<span>SKYBOUND · 600 levels across six themes</span><span>Progress and these options are saved on this PC</span><span>Version 1.1.0</span>';
+  about.innerHTML = '<span>SKYBOUND · 600 levels across six themes</span><span>Progress and these options are saved on this PC</span>';
   host.appendChild(about);
 
   focusItems([...buttons, $('btn-options-back')], 0);

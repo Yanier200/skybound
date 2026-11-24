@@ -1,7 +1,9 @@
-// Streaming soundtrack. Each theme has its own long, seamless-looping track,
-// streamed from disk through an <audio> element instead of decoded into memory:
-// they are uncompressed PCM, so keeping a few in RAM is not an option, but the
-// browser buffers only what it needs.
+// Streaming soundtrack: one looping track per world.
+//
+// The files are uncompressed PCM running to tens of megabytes, so they are
+// streamed by an <audio> element rather than decoded into memory. That only
+// works if the shells answer byte-range requests — see electron/main.cjs and
+// android/src/com/skybound/game/MainActivity.java.
 const TRACKS = {
   menu: { file: 'assets/music/menu.wav', title: 'Drifting In' },
   gardens: { file: 'assets/music/gardens.wav', title: 'Sky Gardens' },
@@ -17,25 +19,22 @@ const TRACKS = {
   credits: { file: 'assets/music/credits.wav', title: 'The Long Way Up' },
 };
 
-const FADE_MS = 900;
-
 export class Music {
   constructor() {
     this.el = null;
     this.key = null;
-    this.volume = 0.5;
+    this.volume = 0.45;
     this.muted = false;
-    this.timer = 0;
+    this.fade = 0;
   }
 
   element() {
     if (this.el) return this.el;
     try {
-      const el = new Audio();
-      el.loop = true;
-      el.preload = 'none';
-      el.volume = 0;
-      this.el = el;
+      this.el = new Audio();
+      this.el.loop = true;
+      this.el.preload = 'none';
+      this.el.volume = 0;
     } catch {
       this.el = null;
     }
@@ -43,67 +42,58 @@ export class Music {
   }
 
   label() {
-    if (this.muted || this.volume <= 0) return 'Muted';
+    if (this.muted || this.volume === 0) return 'Muted';
     const track = this.key && TRACKS[this.key];
     return track ? track.title : '—';
   }
 
-  setMuted(m) {
-    this.muted = m;
+  setMuted(muted) {
+    this.muted = muted;
     this.aim();
   }
 
-  setVolume(v) {
-    this.volume = Math.max(0, Math.min(1, v));
+  setVolume(volume) {
+    this.volume = Math.max(0, Math.min(1, volume));
     this.aim();
   }
 
-  // Slide towards the target instead of jumping, so switching worlds or muting
-  // mid-run does not thump.
-  aim() {
-    const el = this.element();
-    if (!el) return;
-    const target = this.muted ? 0 : this.volume;
-    clearInterval(this.timer);
-    this.timer = setInterval(() => {
-      const d = target - el.volume;
-      if (Math.abs(d) < 0.02) {
-        el.volume = target;
-        clearInterval(this.timer);
-        return;
-      }
-      el.volume = Math.max(0, Math.min(1, el.volume + d * 0.25));
-    }, 40);
-  }
-
-  play(key) {
-    // Themes carry an act suffix ("gardens-i", "neon-Dusk"); the soundtrack has
-    // one track per base world, so fall back to the part before the hyphen.
-    const base = String(key || '').split('-')[0];
-    const resolved = TRACKS[key] ? key : TRACKS[base] ? base : null;
-    const track = resolved && TRACKS[resolved];
+  // Themes carry an act suffix ("neon-Dusk", "gardens-i"); there is one track
+  // per base world, so the suffix is dropped here rather than at every caller.
+  play(theme) {
+    const key = String(theme || '').split('-')[0];
+    const track = TRACKS[key];
     const el = this.element();
     if (!track || !el) return;
-    key = resolved;
-    if (this.key === key && !el.paused) {
-      this.aim();
-      return;
+
+    if (key !== this.key) {
+      this.key = key;
+      el.src = track.file;
+      el.volume = 0;
     }
-    this.key = key;
-    el.loop = true;
-    if (!el.src.endsWith(track.file)) el.src = track.file;
-    el.volume = 0;
-    const started = el.play();
-    if (started && typeof started.catch === 'function') started.catch(() => {});
+    el.play().catch(() => {}); // refused until a user gesture; retried next call
     this.aim();
   }
 
   stop() {
+    this.key = null;
+    if (this.el) this.el.pause();
+  }
+
+  // Slide to the target instead of jumping, so muting or changing world mid-run
+  // never thumps.
+  aim() {
     const el = this.element();
     if (!el) return;
-    this.key = null;
-    clearInterval(this.timer);
-    el.pause();
-    el.volume = 0;
+    const target = this.muted ? 0 : this.volume;
+    clearInterval(this.fade);
+    this.fade = setInterval(() => {
+      const next = el.volume + (target - el.volume) * 0.3;
+      if (Math.abs(target - next) < 0.01) {
+        el.volume = target;
+        clearInterval(this.fade);
+        return;
+      }
+      el.volume = next;
+    }, 40);
   }
 }

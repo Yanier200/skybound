@@ -14,6 +14,7 @@ ANDROID_JAR="$SDK/platforms/android-34/android.jar"
 JAVA_HOME="${JAVA_HOME:-/c/Program Files/Java/jdk-26.0.1}"
 OUT=".tooling/apk"
 VERSION="$(node -p "require('./package.json').version")"
+CODE="$(node -p "require('./package.json').version.split('.').reduce((a, b, i) => a + Number(b) * [10000, 100, 1][i], 0)")"
 APK="SKYBOUND-$VERSION.apk"  # built straight into the project root, easy to grab
 KEYSTORE=".tooling/skybound.keystore"
 ABS="$(pwd)/$OUT/base.apk"
@@ -35,6 +36,7 @@ cp -r js vendor assets android/assets/www/
 "$BT/aapt2.exe" compile --dir android/res -o "$OUT/res.zip"
 "$BT/aapt2.exe" link -o "$OUT/base.apk" -I "$ANDROID_JAR" \
   --manifest android/AndroidManifest.xml \
+  --version-code "$CODE" --version-name "$VERSION" \
   --java "$OUT/gen" --auto-add-overlay "$OUT/res.zip"
 
 # 3. java -> bytecode -> dex

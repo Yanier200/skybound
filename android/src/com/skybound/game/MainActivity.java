@@ -75,68 +75,34 @@ public class MainActivity extends Activity {
         boolean text = type.startsWith("text/") || type.contains("javascript") || type.contains("json");
         String charset = text ? "utf-8" : null;
 
-        // The soundtrack files are tens of megabytes, and the media stack asks
+        // The soundtrack files run to tens of megabytes and the media stack asks
         // for byte ranges instead of a whole body. Answer 206 with a bounded
         // stream, or WebView gives up with a format error and the game is silent.
-        int total = 0;
+        int total;
         try {
           total = raw.available();
         } catch (IOException e) {
-          total = 0;
-        }
-        String range = req.getRequestHeaders().get("Range");
-        int start = 0;
-        int end = total - 1;
-        boolean partial = false;
-        if (range != null && range.startsWith("bytes=")) {
-          String spec = range.substring(6).trim();
-          int dash = spec.indexOf('-');
-          if (dash >= 0) {
-            try {
-              String a = spec.substring(0, dash).trim();
-              String b = spec.substring(dash + 1).trim();
-              if (a.isEmpty() && !b.isEmpty()) {
-                int suffix = Integer.parseInt(b);
-                start = Math.max(0, total - suffix);
-                end = total - 1;
-              } else {
-                start = Integer.parseInt(a);
-                end = b.isEmpty() ? total - 1 : Math.min(Integer.parseInt(b), total - 1);
-              }
-              partial = true;
-            } catch (NumberFormatException e) {
-              start = 0;
-              end = total - 1;
-              partial = false;
-            }
-          }
-        }
-        if (start > end || total == 0) {
-          return new WebResourceResponse(type, charset, 416, "Range Not Satisfiable", null, raw);
+          return null;
         }
 
-        long skip = start;
-        while (skip > 0) {
-          long jumped;
-          try {
-            jumped = raw.skip(skip);
-          } catch (IOException e) {
-            break;
-          }
-          if (jumped <= 0) break;
-          skip -= jumped;
+        int[] span = parseRange(req.getRequestHeaders().get("Range"), total);
+        int start = span == null ? 0 : span[0];
+        int end = span == null ? total - 1 : span[1];
+        try {
+          skipFully(raw, start);
+        } catch (IOException e) {
+          return null;
         }
-        int length = end - start + 1;
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept-Ranges", "bytes");
         headers.put("Cache-Control", "no-store");
-        headers.put("Content-Length", String.valueOf(length));
-        if (partial) headers.put("Content-Range", "bytes " + start + "-" + end + "/" + total);
+        headers.put("Content-Length", String.valueOf(end - start + 1));
+        if (span != null) headers.put("Content-Range", "bytes " + start + "-" + end + "/" + total);
 
         return new WebResourceResponse(
-            type, charset, partial ? 206 : 200, partial ? "Partial Content" : "OK", headers,
-            new SlicedStream(raw, length));
+            type, charset, span == null ? 200 : 206, span == null ? "OK" : "Partial Content", headers,
+            new SlicedStream(raw, end - start + 1));
       }
 
       @Override
@@ -145,6 +111,33 @@ public class MainActivity extends Activity {
       }
     });
     return web;
+  }
+
+  /** "bytes=a-b" against a known length as {start, end}, or null for no usable range. */
+  private static int[] parseRange(String header, int total) {
+    if (header == null || !header.startsWith("bytes=")) return null;
+    String spec = header.substring(6).trim();
+    int dash = spec.indexOf('-');
+    if (dash < 0) return null;
+    String from = spec.substring(0, dash).trim();
+    String to = spec.substring(dash + 1).trim();
+    try {
+      int start = from.isEmpty() ? Math.max(0, total - Integer.parseInt(to)) : Integer.parseInt(from);
+      int end = from.isEmpty() || to.isEmpty() ? total - 1 : Math.min(Integer.parseInt(to), total - 1);
+      if (start > end || start >= total) return null;
+      return new int[] {start, end};
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
+
+  private static void skipFully(InputStream in, int bytes) throws IOException {
+    int left = bytes;
+    while (left > 0) {
+      long jumped = in.skip(left);
+      if (jumped <= 0) throw new IOException("short skip");
+      left -= (int) jumped;
+    }
   }
 
   private static String mime(String path) {
