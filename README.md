@@ -102,6 +102,9 @@ Grab the latest build from the **Releases** tab of this repository:
 
 - **Windows** — `SKYBOUND-<version>-portable.exe`. Run it; nothing is installed.
 - **Android** — `SKYBOUND-<version>.apk`. Sideload it; the APK requests no network permission.
+- **Nintendo Switch (homebrew)** — `SKYBOUND.nro`. This is the platform harness from
+  [`switch/`](switch/README.md), not the game: it boots from the Homebrew Menu, reports docked or
+  handheld and the pad state, and exits on `+`. There is no `.nsp` — see the platform note above.
 
 > **Pre-release software.** The current release is marked as a pre-release on purpose: it is prone
 > to bugs, balance changes and save-format changes between versions. Expect rough edges.

@@ -15,7 +15,7 @@ INCLUDES := include
 
 APP_TITLE       := SKYBOUND
 APP_AUTHOR      := SKYBOUND contributors
-APP_VERSION     := 1.0.0
+APP_VERSION     := 1.0.5
 
 PREFIX   := $(DEVKITPRO)/devkitA64/bin/aarch64-none-elf-
 CC       := $(PREFIX)gcc
