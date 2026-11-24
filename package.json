@@ -11,6 +11,7 @@
     "dev": "node server.js",
     "icon": "node tools/make-icon.mjs",
     "music": "node tools/make-music.mjs",
+    "web": "node tools/build-web.mjs",
     "portable": "electron-builder --win portable --x64"
   },
   "build": {

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self';" />
+<title>SKYBOUND — a 100-level 3D platformer</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+  <div id="vignette"></div>
+  <div id="fade"></div>
+
+  <!-- ============ HUD ============ -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="level-badge">
+        <span id="hud-level">LEVEL 01 / 100</span>
+        <strong id="hud-name">First Light</strong>
+      </div>
+      <div class="hud-stats">
+        <div class="stat"><label>TIME</label><span id="hud-time">0:00.0</span></div>
+        <div class="stat"><label>DEATHS</label><span id="hud-deaths">0</span></div>
+        <button id="btn-mute" class="icon-btn" title="Mute (M)">♪</button>
+        <button id="btn-pause" class="icon-btn" title="Pause (Esc)">❚❚</button>
+      </div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="objectives">
+        <div class="obj" id="obj-crystals"><span class="obj-icon">◆</span><span id="obj-crystals-text">Crystals 0 / 5</span></div>
+        <div class="obj" id="obj-switches"><span class="obj-icon">▣</span><span id="obj-switches-text">Switches 0 / 1</span></div>
+        <div class="obj" id="obj-portal"><span class="obj-icon">◎</span><span>Reach the portal</span></div>
+      </div>
+      <div class="abilities">
+        <div class="abil" id="abil-jump"><span>JUMP ×2</span><kbd>SPACE</kbd></div>
+        <div class="abil" id="abil-dash"><span>DASH</span><kbd>SHIFT</kbd><div class="cd"><i id="dash-fill"></i></div></div>
+      </div>
+    </div>
+    <div class="hint">WASD move · Space jump (twice) · Shift dash · Mouse look · R restart</div>
+  </div>
+
+  <!-- ============ SCREENS ============ -->
+  <div id="screens">
+    <section class="screen active" id="screen-menu">
+      <div class="menu-wrap">
+        <div class="logo">
+          <div class="logo-mark">◈</div>
+          <h1>SKYBOUND</h1>
+          <p class="tagline">One hundred floating worlds. One way up.</p>
+        </div>
+        <div class="menu-actions">
+          <button class="btn primary" id="btn-continue"><span>Continue</span><small id="continue-label">Level 1</small></button>
+          <button class="btn" id="btn-levels">Level Select</button>
+          <button class="btn" id="btn-options">Options</button>
+          <button class="btn" id="btn-controls">How to Play</button>
+        </div>
+        <div class="menu-stats">
+          <div><b id="menu-cleared">0</b><span>Cleared</span></div>
+          <div><b id="menu-stars">0</b><span>Stars</span></div>
+          <div><b id="menu-progress">0%</b><span>Complete</span></div>
+        </div>
+        <p class="menu-foot">Mouse + keyboard or controller · A select · B back</p>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-levels">
+      <header class="page-head">
+        <button class="btn ghost" id="btn-levels-back">← Back</button>
+        <h2>Level Select</h2>
+        <div class="muted" id="levels-summary">0 / 100 cleared</div>
+      </header>
+      <div class="level-list" id="level-list"></div>
+    </section>
+
+    <section class="screen" id="screen-options">
+      <header class="page-head">
+        <button class="btn ghost" id="btn-options-back">← Back</button>
+        <h2>Options</h2>
+        <div class="muted">D-pad moves · A or ←/→ changes</div>
+      </header>
+      <div class="options-body" id="options-list"></div>
+    </section>
+
+    <section class="screen dim" id="screen-pause">
+      <div class="panel">
+        <p class="eyebrow">TAKE A BREATH</p>
+        <h2>Paused</h2>
+        <div class="panel-actions">
+          <button class="btn primary" id="btn-resume">Resume</button>
+          <button class="btn" id="btn-restart">Restart Level</button>
+          <button class="btn" id="btn-levels2">Level Select</button>
+          <button class="btn" id="btn-mute2">Sound: On</button>
+          <button class="btn" id="btn-rumble2">Rumble: On</button>
+          <button class="btn ghost" id="btn-quit">Quit to Desktop</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen dim" id="screen-complete">
+      <div class="panel">
+        <p class="eyebrow">LEVEL COMPLETE</p>
+        <h2 id="complete-name">First Light</h2>
+        <div class="stars" id="complete-stars"><i></i><i></i><i></i></div>
+        <div class="stats-row">
+          <div><b id="complete-time">0:00.0</b><span>Time</span></div>
+          <div><b id="complete-deaths">0</b><span>Deaths</span></div>
+          <div><b id="complete-par">0:00.0</b><span>Par</span></div>
+        </div>
+        <div class="panel-actions row">
+          <button class="btn primary" id="btn-next">Next Level →</button>
+          <button class="btn" id="btn-replay">Replay</button>
+          <button class="btn ghost" id="btn-menu2">Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-controls">
+      <header class="page-head">
+        <button class="btn ghost" id="btn-controls-back">← Back</button>
+        <h2>How to Play</h2>
+        <div class="muted">Reach the portal. Do the objectives first.</div>
+      </header>
+      <div class="controls-grid">
+        <div class="card">
+          <h3>Move</h3>
+          <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> run relative to the camera.</p>
+          <p><kbd>Mouse</kbd> orbits the camera. <kbd>Wheel</kbd> zooms. <kbd>←</kbd><kbd>→</kbd> also turn it.</p>
+        </div>
+        <div class="card">
+          <h3>Jump &amp; dash</h3>
+          <p><kbd>Space</kbd> jump, press again in the air for a second jump.</p>
+          <p><kbd>Shift</kbd> air-dash in the direction you are moving. One per airtime.</p>
+        </div>
+        <div class="card">
+          <h3>Objectives</h3>
+          <p>◆ collect every crystal · ▣ press every switch · ◎ then enter the portal.</p>
+          <p>Checkpoint flags save your respawn point. Falling hurts nothing but your time.</p>
+        </div>
+        <div class="card">
+          <h3>Hazards</h3>
+          <p>Spikes, spinning bars and lasers kill instantly. Crumbling tiles fall away.</p>
+          <p>Green pads launch you skyward. Dark belts shove you around.</p>
+        </div>
+        <div class="card">
+          <h3>Keys</h3>
+          <p><kbd>R</kbd> restart · <kbd>Esc</kbd> pause · <kbd>M</kbd> mute · <kbd>F</kbd> toggle fullscreen.</p>
+        </div>
+        <div class="card">
+          <h3>Controller</h3>
+          <p>Left stick or d-pad moves · <kbd>A</kbd> jump (twice for a double jump) · <kbd>X</kbd>/<kbd>RB</kbd>/<kbd>RT</kbd> dash.</p>
+          <p>Right stick orbits the camera · <kbd>Menu</kbd> pauses and resumes.</p>
+          <p>In menus, the d-pad or left stick moves the highlight, <kbd>A</kbd> selects and <kbd>B</kbd> goes back.</p>
+          <p>Jump, land, dash and wipeout buzz the pad. Switch that off with Rumble in the pause menu.</p>
+        </div>
+        <div class="card">
+          <h3>Stars</h3>
+          <p>★★★ beat par time without dying. ★★ fast or careful. ★ for finishing.</p>
+          <p>Progress saves automatically in this browser.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Controller dropout: dims the game and says why it stopped -->
+  <div id="pad-lost" class="pad-lost">
+    <div class="pad-lost-card">
+      <p class="eyebrow">RUN PAUSED</p>
+      <h2>Controller disconnected</h2>
+      <p class="pad-lost-copy">
+        The controller dropped out, so the run is paused. Reconnect it to carry
+        on from where you stopped, or keep going on the keyboard.
+      </p>
+      <div class="panel-actions">
+        <button class="btn primary" id="btn-pad-lost-resume">Resume on keyboard</button>
+        <button class="btn ghost" id="btn-pad-lost-menu">Main menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"><span id="toast-text"></span></div>
+  <div id="fps" class="hidden">60 FPS</div>
+</div>
+
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
