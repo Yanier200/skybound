@@ -30,8 +30,7 @@ The whole thing is MIT licensed. Source, art pipeline and build scripts are all 
 | **Windows** | ✅ Available | Portable `.exe`, no installer, no admin rights. Comes up fullscreen. |
 | **Android** | ✅ Available | Signed `.apk`, phone and tablet, touch controls. |
 
-plausible, but nothing has been written, built or tested for it, and nothing here should be read as
-a promise that one is coming on any particular date.
+the display and the pad. The renderer, level generation, physics and menus are still to come, and no
 
 ## Screenshots
 
