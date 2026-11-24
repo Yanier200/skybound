@@ -31,6 +31,7 @@ The whole thing is MIT licensed. Source, art pipeline and build scripts are all 
 | --- | --- | --- |
 | **Windows** | ✅ Available | Portable `.exe`, no installer, no admin rights. Comes up fullscreen. |
 | **Android** | ✅ Available | Signed `.apk`, phone and tablet, touch controls. |
+| **Roblox** | 🕒 **Coming soon** | A Roblox version is on the way — the game is being ported in Roblox Studio. Not playable yet. |
 
 the display and the pad. The renderer, level generation, physics and menus are still to come.
 
