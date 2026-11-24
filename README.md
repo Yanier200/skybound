@@ -57,8 +57,8 @@ the display and the pad. The renderer, level generation, physics and menus are s
   disconnect (unplug mid-run and the level pauses rather than killing you blind).
 - **Couch-friendly display options**: graphics preset, HUD size up to TV scale, frame counter and a
   fullscreen toggle driven through the desktop shell rather than the browser API.
-- **A full soundtrack**: eleven long, seamless-looping tracks — one per world plus the menu —
-  streamed from disk rather than decoded up front, with its own volume setting in Options.
+- **A full soundtrack**: twelve long, seamless-looping tracks — one per world, the menu and the
+  results screen — streamed from disk rather than decoded up front, with its own volume setting.
 - **Everything is local**: no accounts, no network calls, no telemetry. Progress lives in
   `localStorage` on the device.
 - **No build step for the game itself** — plain ES modules and a vendored Three.js, served as
@@ -66,8 +66,9 @@ the display and the pad. The renderer, level generation, physics and menus are s
 
 ## Soundtrack
 
-Eleven tracks, one per world plus the menu, all synthesised by `tools/make-music.mjs` and looped
-seamlessly. Each is 7.5 minutes of 44.1 kHz stereo PCM, streamed from disk.
+Twelve tracks — one per world, plus the menu and the results screen — all synthesised by
+`tools/make-music.mjs` and looped seamlessly. Each is 11.4 minutes of 44.1 kHz stereo PCM, streamed
+from disk.
 
 | Track | World | Track | World |
 | --- | --- | --- | --- |
@@ -76,7 +77,7 @@ seamlessly. Each is 7.5 minutes of 44.1 kHz stereo PCM, streamed from disk.
 | Amber Dunes | Amber Dunes | Crystal Reach | Crystal Reach |
 | Frost Hollow | Frost Hollow | Final Spire | Final Spire |
 | Neon Grid | Neon Grid | Ember Depths | Ember Depths |
-| Toxic Vault | Toxic Vault | | |
+| Toxic Vault | Toxic Vault | The Long Way Up | results screen |
 
 The volume is separate from the effects volume (Options → Audio), `M` mutes both, and the Track row
 in Options restarts the current piece.

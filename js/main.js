@@ -616,6 +616,7 @@ function finishLevel() {
   $('btn-next').textContent = game.level >= LEVEL_COUNT - 1 ? 'Level Select' : 'Next Level →';
 
   hideHud();
+  music.play('credits');
   showScreen('screen-complete');
   focusItems([$('btn-next'), $('btn-replay'), $('btn-menu2')], 0, 3);
   updateMenuUi();

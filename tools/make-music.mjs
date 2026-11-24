@@ -25,17 +25,18 @@ const secondsArg = Number((args.find((a) => a.startsWith('--seconds=')) || '').s
 // picked against the palette in js/levelgen.js so the music matches the world.
 // ---------------------------------------------------------------------------
 const TRACKS = [
-  { id: 'menu',      title: 'Drifting In',     root: 57, mode: 'ionian',   bpm: 78,  minutes: 7.5, seed: 7,  density: 0.5 },
-  { id: 'gardens',   title: 'Sky Gardens',     root: 62, mode: 'lydian',   bpm: 92,  minutes: 7.5, seed: 11, density: 0.7 },
-  { id: 'dunes',     title: 'Amber Dunes',     root: 55, mode: 'dorian',   bpm: 84,  minutes: 7.5, seed: 23, density: 0.6 },
-  { id: 'frost',     title: 'Frost Hollow',    root: 60, mode: 'aeolian',  bpm: 72,  minutes: 7.5, seed: 31, density: 0.45 },
-  { id: 'neon',      title: 'Neon Grid',       root: 59, mode: 'phrygian', bpm: 104, minutes: 7.5, seed: 47, density: 0.85 },
-  { id: 'ember',     title: 'Ember Depths',    root: 53, mode: 'locrian',  bpm: 96,  minutes: 7.5, seed: 59, density: 0.75 },
-  { id: 'toxic',     title: 'Toxic Vault',     root: 58, mode: 'aeolian',  bpm: 100, minutes: 7.5, seed: 67, density: 0.8 },
-  { id: 'void',      title: 'Void Circuit',    root: 56, mode: 'phrygian', bpm: 88,  minutes: 7.5, seed: 73, density: 0.55 },
-  { id: 'sunset',    title: 'Sunset Rift',     root: 61, mode: 'mixolydian', bpm: 90, minutes: 7.5, seed: 83, density: 0.65 },
-  { id: 'crystal',   title: 'Crystal Reach',   root: 63, mode: 'lydian',   bpm: 80,  minutes: 7.5, seed: 97, density: 0.5 },
-  { id: 'spire',     title: 'Final Spire',     root: 54, mode: 'aeolian',  bpm: 112, minutes: 7.5, seed: 101, density: 0.9 },
+  { id: 'menu',      title: 'Drifting In',     root: 57, mode: 'ionian',   bpm: 78,  minutes: 11.4, seed: 7,  density: 0.5 },
+  { id: 'gardens',   title: 'Sky Gardens',     root: 62, mode: 'lydian',   bpm: 92,  minutes: 11.4, seed: 11, density: 0.7 },
+  { id: 'dunes',     title: 'Amber Dunes',     root: 55, mode: 'dorian',   bpm: 84,  minutes: 11.4, seed: 23, density: 0.6 },
+  { id: 'frost',     title: 'Frost Hollow',    root: 60, mode: 'aeolian',  bpm: 72,  minutes: 11.4, seed: 31, density: 0.45 },
+  { id: 'neon',      title: 'Neon Grid',       root: 59, mode: 'phrygian', bpm: 104, minutes: 11.4, seed: 47, density: 0.85 },
+  { id: 'ember',     title: 'Ember Depths',    root: 53, mode: 'locrian',  bpm: 96,  minutes: 11.4, seed: 59, density: 0.75 },
+  { id: 'toxic',     title: 'Toxic Vault',     root: 58, mode: 'aeolian',  bpm: 100, minutes: 11.4, seed: 67, density: 0.8 },
+  { id: 'void',      title: 'Void Circuit',    root: 56, mode: 'phrygian', bpm: 88,  minutes: 11.4, seed: 73, density: 0.55 },
+  { id: 'sunset',    title: 'Sunset Rift',     root: 61, mode: 'mixolydian', bpm: 90, minutes: 11.4, seed: 83, density: 0.65 },
+  { id: 'crystal',   title: 'Crystal Reach',   root: 63, mode: 'lydian',   bpm: 80,  minutes: 11.4, seed: 97, density: 0.5 },
+  { id: 'spire',     title: 'Final Spire',     root: 54, mode: 'aeolian',  bpm: 112, minutes: 11.4, seed: 101, density: 0.9 },
+  { id: 'credits',   title: 'The Long Way Up',  root: 57, mode: 'ionian',   bpm: 74,  minutes: 11.4, seed: 131, density: 0.4 },
 ];
 
 const MODES = {

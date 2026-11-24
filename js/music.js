@@ -14,6 +14,7 @@ const TRACKS = {
   sunset: { file: 'assets/music/sunset.wav', title: 'Sunset Rift' },
   crystal: { file: 'assets/music/crystal.wav', title: 'Crystal Reach' },
   spire: { file: 'assets/music/spire.wav', title: 'Final Spire' },
+  credits: { file: 'assets/music/credits.wav', title: 'The Long Way Up' },
 };
 
 const FADE_MS = 900;
