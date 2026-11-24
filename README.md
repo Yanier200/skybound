@@ -34,8 +34,6 @@ The whole thing is MIT licensed. Source, art pipeline and build scripts are all 
 | **Android** | ✅ Available | Signed `.apk`, phone and tablet, touch controls. |
 | **Roblox** | 🕒 **Coming soon** | A Roblox version is on the way — the game is being ported in Roblox Studio. Not playable yet. |
 
-the display and the pad. The renderer, level generation, physics and menus are still to come.
-
 ## Screenshots
 
 | Menu | Level select |
@@ -119,7 +117,6 @@ Grab the latest build from the **Releases** tab of this repository:
 
 - **Windows** — `SKYBOUND-<version>-portable.exe`. Run it; nothing is installed.
 - **Android** — `SKYBOUND-<version>.apk`. Sideload it; the APK requests no network permission.
-  state, and exits on `+`. See the platform note above.
 
 > **Pre-release software.** The current release is marked as a pre-release on purpose: it is prone
 > to bugs, balance changes and save-format changes between versions. Expect rough edges.
