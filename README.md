@@ -22,6 +22,7 @@ The whole thing is MIT licensed. Source, art pipeline and build scripts are all 
 - [Project layout](#project-layout)
 - [Known issues](#known-issues)
 - [How this was made](#how-this-was-made)
+- [Contributors](#contributors)
 - [License](#license)
 
 ## Platforms
@@ -156,6 +157,11 @@ If you hit something broken, please open an issue with the level number and what
 ## How this was made
 
 **SKYBOUND was partly built with the help of AI — roughly a quarter of it.** The rest is hand-made.
+
+## Contributors
+
+- [@Yanier200](https://github.com/Yanier200) — maintainer
+- Claude — AI assistant
 
 ## License
 
