@@ -1,10 +1,10 @@
 {
   "name": "skybound",
   "productName": "SKYBOUND",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "private": true,
   "type": "module",
-  "description": "A 100-level 3D platformer built with Three.js",
+  "description": "A 600-level 3D platformer built with Three.js",
   "author": "SKYBOUND",
   "main": "electron/main.cjs",
   "scripts": {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds release/SKYBOUND-1.0.0.apk: the game bundled into a WebView app.
+# Builds SKYBOUND-<version>.apk in the project root: the game bundled into a WebView app.
 #
 # No Gradle or Android Studio needed - aapt2, javac, d8, zipalign and apksigner
 # from the SDK in .tooling/android-sdk do the whole job, so the build is quick
@@ -13,7 +13,8 @@ BT="$SDK/build-tools/35.0.0"
 ANDROID_JAR="$SDK/platforms/android-34/android.jar"
 JAVA_HOME="${JAVA_HOME:-/c/Program Files/Java/jdk-26.0.1}"
 OUT=".tooling/apk"
-APK="SKYBOUND-1.0.0.apk"  # built straight into the project root, easy to grab
+VERSION="$(node -p "require('./package.json').version")"
+APK="SKYBOUND-$VERSION.apk"  # built straight into the project root, easy to grab
 KEYSTORE=".tooling/skybound.keystore"
 ABS="$(pwd)/$OUT/base.apk"
 
