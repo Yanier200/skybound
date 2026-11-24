@@ -11,7 +11,10 @@ import { fileURLToPath } from 'node:url';
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'music');
 const RATE = 44100;
-const SECONDS = 684; // 11.4 minutes per track
+// Loop length. Sized so the packaged APK lands on the 1.5 GB artifact target:
+// the zip deflates PCM by ~5.7%, so 12 x 752 s at 44.1 kHz stereo comes to
+// ~1.50 GB packed. Change this and both artifacts move.
+const SECONDS = 752; // 12.5 minutes per track
 const FADE = 3; // tail seconds blended into the head, so the loop point is silent
 const TABLE = 4096;
 
